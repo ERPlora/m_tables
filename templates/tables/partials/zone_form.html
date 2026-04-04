@@ -1,0 +1,102 @@
+<div data-back-url="/m/tables/zones" hidden></div>
+
+<div class="p-4">
+    <form method="post"
+          hx-post=""
+          hx-target="#main-content-area">
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 class="card-title">{% if is_new %}{{ _("New Zone") }}{% else %}{{ _("Edit Zone") }} &mdash; {{ zone.name }}{% endif %}</h3>
+            </div>
+            <div class="card-body">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="form-group-label mb-1">{{ _("Name") }}</label>
+                        <input type="text" name="name" class="input" placeholder="{{ _('Zone name') }}"
+                               value="{% if not is_new %}{{ zone.name }}{% endif %}" required>
+                    </div>
+                    <div>
+                        <label class="form-group-label mb-1">{{ _("Color") }}</label>
+                        <select name="color" class="select">
+                            {% for val, label in [('primary', 'Primary'), ('secondary', 'Secondary'), ('success', 'Success'), ('warning', 'Warning'), ('error', 'Danger'), ('info', 'Info')] %}
+                            <option value="{{ val }}" {% if not is_new and zone.color == val %}selected{% endif %}>{{ _(label) }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-group-label mb-1">{{ _("Sort Order") }}</label>
+                        <input type="number" name="sort_order" class="input" min="0"
+                               value="{% if not is_new %}{{ zone.sort_order }}{% else %}0{% endif %}">
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <label class="toggle">
+                            <input type="checkbox" name="is_active" value="on"
+                                   {% if is_new or zone.is_active %}checked{% endif %}>
+                        </label>
+                        <span>{{ _("Active") }}</span>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <label class="form-group-label mb-1">{{ _("Description") }}</label>
+                    <textarea name="description" class="textarea" rows="3"
+                              placeholder="{{ _('Optional description') }}">{% if not is_new %}{{ zone.description }}{% endif %}</textarea>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-lg btn-block color-primary">
+            {% if is_new %}
+            {{ icon("add-outline") }} {{ _("Create Zone") }}
+            {% else %}
+            {{ icon("checkmark-outline") }} {{ _("Save Changes") }}
+            {% endif %}
+        </button>
+    </form>
+
+    {% if not is_new %}
+    <div x-data="{ showDeleteConfirm: false }">
+        <!-- Danger Zone -->
+        <div class="card mt-6" style="border-color: var(--color-error)">
+            <div class="card-header">
+                <h3 class="card-title text-error">{{ _("Danger Zone") }}</h3>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">{{ _("Permanently delete this zone. Tables in this zone will become unassigned.") }}</p>
+                <button type="button" class="btn btn-outline color-error"
+                        @click="showDeleteConfirm = true">
+                    {{ icon("trash-outline") }} {{ _("Delete Zone") }}
+                </button>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div class="modal-backdrop" :data-state="showDeleteConfirm ? 'open' : 'closed'" @click.self="showDeleteConfirm = false">
+            <div class="modal modal-sm">
+                <div class="modal-header">
+                    <h3 class="modal-title">{{ _("Delete Zone") }}</h3>
+                    <button class="modal-close" @click="showDeleteConfirm = false">{{ icon("close-outline") }}</button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-sm text-base-content/70">{{ _("Delete this zone? Tables in this zone will become unassigned.") }}</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-ghost btn-sm" @click="showDeleteConfirm = false">{{ _("Cancel") }}</button>
+                    <button class="btn btn-sm color-error" @click="
+                        showDeleteConfirm = false;
+                        fetch('/m/tables/zones/{{ zone.id }}/delete', {
+                            method: 'POST',
+                            headers: {'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''}
+                        }).then(r => r.json()).then(data => {
+                            if (data.success) {
+                                htmx.ajax('GET', '/m/tables/zones', '#main-content-area');
+                            }
+                        })">
+                        {{ icon("trash-outline") }} {{ _("Delete") }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>

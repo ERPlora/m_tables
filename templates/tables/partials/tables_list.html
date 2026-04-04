@@ -1,0 +1,105 @@
+<!-- Filters + Add Table -->
+<div class="flex items-center gap-3 p-4">
+    <input type="search"
+           name="q"
+           value="{{ search_query }}"
+           placeholder="{{ _('Search tables...') }}"
+           class="input flex-1"
+           hx-get="/m/tables/tables"
+           hx-target="#main-content-area"
+           hx-push-url="true"
+           hx-trigger="input changed delay:300ms, search"
+           hx-include="[name='zone'], [name='status']">
+</div>
+<div class="flex items-center gap-3 px-4 mb-4">
+    <select class="select flex-1"
+            name="zone"
+            hx-get="/m/tables/tables"
+            hx-target="#main-content-area"
+            hx-push-url="true"
+            hx-include="[name='q'], [name='status']">
+        <option value="">{{ _("All zones") }}</option>
+        {% for zone in zones %}
+        <option value="{{ zone.id }}" {% if zone_filter == zone.id|string %}selected{% endif %}>{{ zone.name }}</option>
+        {% endfor %}
+    </select>
+    <select class="select flex-1"
+            name="status"
+            hx-get="/m/tables/tables"
+            hx-target="#main-content-area"
+            hx-push-url="true"
+            hx-include="[name='q'], [name='zone']">
+        <option value="">{{ _("All statuses") }}</option>
+        {% for value, label in status_choices %}
+        <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+    <a hx-get="/m/tables/tables/add"
+       hx-target="#main-content-area"
+       hx-push-url="true"
+       class="btn color-primary">
+        {{ icon("add-outline") }}
+        <span class="hidden md:inline">{{ _("Add") }}</span>
+    </a>
+</div>
+
+<!-- Tables list -->
+<div class="px-4 pb-4">
+    <div class="card">
+        <div class="list">
+            {% for table in tables %}
+            <a hx-get="/m/tables/tables/{{ table.id }}"
+               hx-target="#main-content-area"
+               hx-push-url="true"
+               class="list-item list-item-clickable">
+                <div class="list-item-start">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center"
+                         style="background: {% if table.status == 'available' %}var(--color-success-tint, rgba(52,199,89,0.15)){% elif table.status == 'occupied' %}var(--color-warning-tint, rgba(255,149,0,0.15)){% elif table.status == 'reserved' %}var(--color-primary-tint, rgba(0,122,255,0.15)){% else %}var(--color-error-tint, rgba(255,59,48,0.15)){% endif %}; color: {% if table.status == 'available' %}var(--color-success){% elif table.status == 'occupied' %}var(--color-warning){% elif table.status == 'reserved' %}var(--color-primary){% else %}var(--color-error){% endif %};">
+                        <span class="font-bold text-sm">{{ table.number }}</span>
+                    </div>
+                </div>
+                <div class="list-item-content">
+                    <div class="list-item-label">
+                        {{ table.display_name }}
+                        {% if not table.is_active %}
+                        <span class="badge badge-sm ml-2">{{ _("Inactive") }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="list-item-note">
+                        {{ icon("people-outline", class="text-xs") }} {{ table.capacity }} {{ _("seats") }}
+                        {% if table.zone %} &middot; {{ table.zone.name }}{% endif %}
+                        &middot; {{ table.shape_label }}
+                    </div>
+                </div>
+                <div class="list-item-end text-right">
+                    <span class="badge badge-sm color-{{ table.status_color }}">
+                        {{ table.status_label }}
+                    </span>
+                </div>
+            </a>
+            {% else %}
+            <div class="p-8 text-center">
+                {{ icon("grid-outline", class="text-4xl text-muted mb-2") }}
+                <p class="text-muted mb-3">{{ _("No tables found") }}</p>
+                {% if search_query or zone_filter or status_filter %}
+                <p class="text-sm text-muted mb-4">{{ _("Try adjusting your filters.") }}</p>
+                <a hx-get="/m/tables/tables"
+                   hx-target="#main-content-area"
+                   hx-push-url="true"
+                   class="btn btn-outline">
+                    {{ icon("refresh-outline") }} {{ _("Clear Filters") }}
+                </a>
+                {% else %}
+                <p class="text-sm text-muted mb-4">{{ _("Start by adding tables to your restaurant.") }}</p>
+                <a hx-get="/m/tables/tables/add"
+                   hx-target="#main-content-area"
+                   hx-push-url="true"
+                   class="btn color-primary">
+                    {{ icon("add-outline") }} {{ _("Add First Table") }}
+                </a>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>

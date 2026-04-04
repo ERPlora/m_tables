@@ -1,0 +1,135 @@
+<div class="p-4">
+    <!-- Overview Stats -->
+    <div class="grid grid-cols-3 gap-3 mb-4">
+        <div class="card">
+            <div class="card-body flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    {{ icon("grid-outline", class="text-xl text-primary") }}
+                </div>
+                <div>
+                    <div class="text-2xl font-bold">{{ total_tables }}</div>
+                    <div class="text-xs text-muted">{{ _("Total Tables") }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
+                    {{ icon("checkmark-circle-outline", class="text-xl text-success") }}
+                </div>
+                <div>
+                    <div class="text-2xl font-bold">{{ active_tables }}</div>
+                    <div class="text-xs text-muted">{{ _("Active Tables") }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center">
+                    {{ icon("time-outline", class="text-xl text-warning") }}
+                </div>
+                <div>
+                    <div class="text-2xl font-bold">{{ active_sessions }}</div>
+                    <div class="text-xs text-muted">{{ _("Active Sessions") }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Zones Management -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3 class="card-title">{{ icon("layers-outline", class="text-primary") }} {{ _("Zones") }}</h3>
+        </div>
+        <div class="list">
+            {% for zone in zones %}
+            <a hx-get="/m/tables/zones/{{ zone.id }}/edit"
+               hx-target="#main-content-area"
+               hx-push-url="true"
+               class="list-item list-item-clickable">
+                <div class="list-item-start">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center"
+                         style="background: var(--color-{{ zone.color }}, var(--color-primary))20; color: var(--color-{{ zone.color }}, var(--color-primary))">
+                        {{ icon("layers-outline", class="text-lg") }}
+                    </div>
+                </div>
+                <div class="list-item-content">
+                    <div class="list-item-label">
+                        {{ zone.name }}
+                        {% if not zone.is_active %}
+                        <span class="badge badge-sm ml-1">{{ _("Inactive") }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="list-item-note">{{ zone.table_count }} {{ _("tables") }}</div>
+                </div>
+                <div class="list-item-end">{{ icon("chevron-forward-outline", class="text-muted") }}</div>
+            </a>
+            {% else %}
+            <div class="p-6 text-center text-muted text-sm">
+                {{ _("No zones created") }}
+            </div>
+            {% endfor %}
+        </div>
+        <div class="card-body pt-0">
+            <a hx-get="/m/tables/zones/add"
+               hx-target="#main-content-area"
+               hx-push-url="true"
+               class="btn btn-sm btn-outline btn-block color-primary">
+                {{ icon("add-outline") }} {{ _("Add Zone") }}
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3 class="card-title">{{ icon("link-outline") }} {{ _("Quick Actions") }}</h3>
+        </div>
+        <div class="list">
+            <a hx-get="/m/tables/floor-plan"
+               hx-target="#main-content-area"
+               hx-push-url="true"
+               class="list-item list-item-clickable">
+                <div class="list-item-start">{{ icon("map-outline", class="text-primary") }}</div>
+                <div class="list-item-content">
+                    <div class="list-item-label">{{ _("Floor Plan") }}</div>
+                    <div class="list-item-note">{{ _("Visual table layout and positioning") }}</div>
+                </div>
+                <div class="list-item-end">{{ icon("chevron-forward-outline", class="text-muted") }}</div>
+            </a>
+            <a hx-get="/m/tables/tables"
+               hx-target="#main-content-area"
+               hx-push-url="true"
+               class="list-item list-item-clickable">
+                <div class="list-item-start">{{ icon("grid-outline", class="text-success") }}</div>
+                <div class="list-item-content">
+                    <div class="list-item-label">{{ _("Manage Tables") }}</div>
+                    <div class="list-item-note">{{ total_tables }} {{ _("tables configured") }}</div>
+                </div>
+                <div class="list-item-end">{{ icon("chevron-forward-outline", class="text-muted") }}</div>
+            </a>
+            <a hx-get="/m/tables/sessions"
+               hx-target="#main-content-area"
+               hx-push-url="true"
+               class="list-item list-item-clickable">
+                <div class="list-item-start">{{ icon("time-outline", class="text-warning") }}</div>
+                <div class="list-item-content">
+                    <div class="list-item-label">{{ _("Active Sessions") }}</div>
+                    <div class="list-item-note">{{ active_sessions }} {{ _("tables currently in use") }}</div>
+                </div>
+                <div class="list-item-end">{{ icon("chevron-forward-outline", class="text-muted") }}</div>
+            </a>
+            <a hx-get="/m/tables/tables/add"
+               hx-target="#main-content-area"
+               hx-push-url="true"
+               class="list-item list-item-clickable">
+                <div class="list-item-start">{{ icon("add-circle-outline", class="text-primary") }}</div>
+                <div class="list-item-content">
+                    <div class="list-item-label">{{ _("Add New Table") }}</div>
+                    <div class="list-item-note">{{ _("Create a new table for your restaurant") }}</div>
+                </div>
+                <div class="list-item-end">{{ icon("chevron-forward-outline", class="text-muted") }}</div>
+            </a>
+        </div>
+    </div>
+</div>

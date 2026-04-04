@@ -1,0 +1,152 @@
+<div data-back-url="{% if is_new %}/m/tables/tables{% else %}/m/tables/tables/{{ table.id }}{% endif %}" hidden></div>
+
+<div class="p-4">
+    <form method="post"
+          hx-post=""
+          hx-target="#main-content-area">
+
+        <!-- Basic Info -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 class="card-title">{% if is_new %}{{ _("New Table") }}{% else %}{{ _("Edit Table") }} &mdash; {{ table.display_name }}{% endif %}</h3>
+            </div>
+            <div class="card-body">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="form-group-label mb-1">{{ _("Table Number") }} *</label>
+                        <input type="text" name="number" class="input" placeholder="{{ _('e.g. 1, A1') }}"
+                               value="{% if not is_new %}{{ table.number }}{% endif %}" required>
+                    </div>
+                    <div>
+                        <label class="form-group-label mb-1">{{ _("Name") }}</label>
+                        <input type="text" name="name" class="input" placeholder="{{ _('Optional friendly name') }}"
+                               value="{% if not is_new %}{{ table.name }}{% endif %}">
+                    </div>
+                    <div>
+                        <label class="form-group-label mb-1">{{ _("Zone") }}</label>
+                        <select name="zone_id" class="select">
+                            <option value="">{{ _("No zone") }}</option>
+                            {% for zone in zones %}
+                            <option value="{{ zone.id }}" {% if not is_new and table.zone_id == zone.id %}selected{% endif %}>{{ zone.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-group-label mb-1">{{ _("Capacity") }} *</label>
+                        <input type="number" name="capacity" class="input" min="1"
+                               value="{% if not is_new %}{{ table.capacity }}{% else %}4{% endif %}">
+                    </div>
+                    <div>
+                        <label class="form-group-label mb-1">{{ _("Shape") }}</label>
+                        <select name="shape" class="select">
+                            {% for val, label in shape_choices %}
+                            <option value="{{ val }}" {% if not is_new and table.shape == val %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-group-label mb-1">{{ _("Status") }}</label>
+                        <select name="status" class="select">
+                            {% for val, label in status_choices %}
+                            <option value="{{ val }}" {% if not is_new and table.status == val %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <label class="toggle">
+                            <input type="checkbox" name="is_active" value="on"
+                                   {% if is_new or table.is_active %}checked{% endif %}>
+                        </label>
+                        <span>{{ _("Active") }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floor Plan Position -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 class="card-title">{{ icon("map-outline", class="text-primary") }} {{ _("Floor Plan Position") }}</h3>
+                <p class="text-sm opacity-60">{{ _("Position and size on the floor plan (0-100 scale).") }}</p>
+            </div>
+            <div class="card-body">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div>
+                        <label class="form-group-label mb-1">{{ _("Position X") }}</label>
+                        <input type="number" name="position_x" class="input" min="0" max="100"
+                               value="{% if not is_new %}{{ table.position_x }}{% else %}0{% endif %}">
+                    </div>
+                    <div>
+                        <label class="form-group-label mb-1">{{ _("Position Y") }}</label>
+                        <input type="number" name="position_y" class="input" min="0" max="100"
+                               value="{% if not is_new %}{{ table.position_y }}{% else %}0{% endif %}">
+                    </div>
+                    <div>
+                        <label class="form-group-label mb-1">{{ _("Width") }}</label>
+                        <input type="number" name="width" class="input" min="5" max="50"
+                               value="{% if not is_new %}{{ table.width }}{% else %}10{% endif %}">
+                    </div>
+                    <div>
+                        <label class="form-group-label mb-1">{{ _("Height") }}</label>
+                        <input type="number" name="height" class="input" min="5" max="50"
+                               value="{% if not is_new %}{{ table.height }}{% else %}10{% endif %}">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-lg btn-block color-primary">
+            {% if is_new %}
+            {{ icon("add-outline") }} {{ _("Create Table") }}
+            {% else %}
+            {{ icon("checkmark-outline") }} {{ _("Save Changes") }}
+            {% endif %}
+        </button>
+    </form>
+
+    {% if not is_new %}
+    <div x-data="{ showDeleteConfirm: false }">
+        <!-- Danger Zone -->
+        <div class="card mt-6" style="border-color: var(--color-error)">
+            <div class="card-header">
+                <h3 class="card-title text-error">{{ _("Danger Zone") }}</h3>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">{{ _("Permanently delete this table and all associated sessions.") }}</p>
+                <button type="button" class="btn btn-outline color-error"
+                        @click="showDeleteConfirm = true">
+                    {{ icon("trash-outline") }} {{ _("Delete Table") }}
+                </button>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div class="modal-backdrop" :data-state="showDeleteConfirm ? 'open' : 'closed'" @click.self="showDeleteConfirm = false">
+            <div class="modal modal-sm">
+                <div class="modal-header">
+                    <h3 class="modal-title">{{ _("Delete Table") }}</h3>
+                    <button class="modal-close" @click="showDeleteConfirm = false">{{ icon("close-outline") }}</button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-sm text-base-content/70">{{ _("Delete this table? All associated sessions will be lost.") }}</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-ghost btn-sm" @click="showDeleteConfirm = false">{{ _("Cancel") }}</button>
+                    <button class="btn btn-sm color-error" @click="
+                        showDeleteConfirm = false;
+                        fetch('/m/tables/tables/{{ table.id }}/delete', {
+                            method: 'POST',
+                            headers: {'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''}
+                        }).then(r => r.json()).then(data => {
+                            if (data.success) {
+                                htmx.ajax('GET', '/m/tables/tables', '#main-content-area');
+                            }
+                        })">
+                        {{ icon("trash-outline") }} {{ _("Delete") }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>

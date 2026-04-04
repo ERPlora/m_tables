@@ -1,0 +1,65 @@
+<div class="p-4">
+    <!-- Header + filter -->
+    <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold">{{ _("Sessions") }}</h3>
+        <label class="flex items-center gap-2 text-sm">
+            <label class="toggle toggle">
+                <input type="checkbox"
+                       {% if show_closed %}checked{% endif %}
+                       hx-get="/m/tables/sessions"
+                       hx-target="#main-content-area"
+                       hx-push-url="true"
+                       hx-vals='js:{show_closed: event.target.checked ? "true" : "false"}'>
+            </label>
+            <span class="text-muted">{{ _("Show closed") }}</span>
+        </label>
+    </div>
+
+    <!-- Sessions list -->
+    <div class="card">
+        <div class="list">
+            {% for session in sessions %}
+            <a hx-get="/m/tables/tables/{{ session.table.id }}"
+               hx-target="#main-content-area"
+               hx-push-url="true"
+               class="list-item list-item-clickable">
+                <div class="list-item-start">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center"
+                         style="background: {% if session.status == 'active' %}var(--color-warning-tint, rgba(255,149,0,0.15)){% elif session.status == 'transferred' %}var(--color-primary-tint, rgba(0,122,255,0.15)){% else %}var(--color-base-200){% endif %}; color: {% if session.status == 'active' %}var(--color-warning){% elif session.status == 'transferred' %}var(--color-primary){% else %}var(--color-base-content){% endif %};">
+                        <span class="font-bold text-sm">{{ session.table.number }}</span>
+                    </div>
+                </div>
+                <div class="list-item-content">
+                    <div class="list-item-label">
+                        {{ session.table.display_name }}
+                        {% if session.table.zone %}<span class="text-muted"> &middot; {{ session.table.zone.name }}</span>{% endif %}
+                    </div>
+                    <div class="list-item-note">
+                        {{ icon("people-outline", class="text-xs") }} {{ session.guests_count }} {{ _("guests") }}
+                        &middot; {{ session.opened_at.strftime("%H:%M") }}{% if session.closed_at %} &rarr; {{ session.closed_at.strftime("%H:%M") }}{% endif %}
+                        &middot; {{ session.duration_minutes }} {{ _("min") }}
+                    </div>
+                </div>
+                <div class="list-item-end text-right">
+                    <span class="badge badge-sm color-{{ session.status_color }}">
+                        {{ session.status_label }}
+                    </span>
+                    <div class="text-xs text-muted mt-1">{{ session.opened_at.strftime("%b %d") }}</div>
+                </div>
+            </a>
+            {% else %}
+            <div class="p-8 text-center">
+                {{ icon("time-outline", class="text-4xl text-muted mb-2") }}
+                <p class="text-muted mb-3">
+                    {% if show_closed %}
+                    {{ _("No sessions found") }}
+                    {% else %}
+                    {{ _("No active sessions") }}
+                    {% endif %}
+                </p>
+                <p class="text-sm text-muted">{{ _("Sessions are created when you open a table for guests.") }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>

@@ -1,0 +1,230 @@
+<!-- Status stats -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3 p-4">
+    <div class="card">
+        <div class="card-body flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
+                {{ icon("checkmark-circle-outline", class="text-xl text-success") }}
+            </div>
+            <div>
+                <div class="text-2xl font-bold">{{ status_counts.available }}</div>
+                <div class="text-xs text-muted">{{ _("Available") }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center">
+                {{ icon("people-outline", class="text-xl text-warning") }}
+            </div>
+            <div>
+                <div class="text-2xl font-bold">{{ status_counts.occupied }}</div>
+                <div class="text-xs text-muted">{{ _("Occupied") }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                {{ icon("calendar-outline", class="text-xl text-primary") }}
+            </div>
+            <div>
+                <div class="text-2xl font-bold">{{ status_counts.reserved }}</div>
+                <div class="text-xs text-muted">{{ _("Reserved") }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-error/10 flex items-center justify-center">
+                {{ icon("close-circle-outline", class="text-xl text-error") }}
+            </div>
+            <div>
+                <div class="text-2xl font-bold">{{ status_counts.blocked }}</div>
+                <div class="text-xs text-muted">{{ _("Blocked") }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Zone filter -->
+<div class="flex items-center gap-3 px-4 mb-4">
+    <select class="select flex-1"
+            hx-get="/m/tables/floor-plan"
+            hx-target="#main-content-area"
+            hx-push-url="true"
+            name="zone">
+        <option value="">{{ _("All zones") }}</option>
+        {% for z in zones %}
+        <option value="{{ z.id }}" {% if zone_filter == z.id|string %}selected{% endif %}>{{ z.name }}</option>
+        {% endfor %}
+    </select>
+    <span class="text-sm text-muted">{{ total_tables }} {{ _("tables") }}</span>
+</div>
+
+<!-- Floor plan visual -->
+<div class="px-4 mb-4">
+    <div class="card">
+        <div class="card-body p-0">
+            <div id="floor-plan-canvas"
+                 class="relative overflow-hidden"
+                 style="height: 400px; background: var(--color-base-200); border-radius: var(--radius-box);">
+
+                {% if tables %}
+                <!-- Table elements positioned absolutely -->
+                {% for table in tables %}
+                <div class="floor-plan-table absolute cursor-pointer flex flex-col items-center justify-center text-center transition-all"
+                     data-table-id="{{ table.id }}"
+                     data-status="{{ table.status }}"
+                     style="left: {{ table.position_x }}%; top: {{ table.position_y }}%;
+                            width: {{ table.width }}%; height: {{ table.height }}%;
+                            {% if table.shape == 'round' %}border-radius: 50%;{% else %}border-radius: 6px;{% endif %}
+                            background: {% if table.status == 'available' %}var(--color-success-tint, rgba(52,199,89,0.15)){% elif table.status == 'occupied' %}var(--color-warning-tint, rgba(255,149,0,0.15)){% elif table.status == 'reserved' %}var(--color-primary-tint, rgba(0,122,255,0.15)){% else %}var(--color-error-tint, rgba(255,59,48,0.15)){% endif %};
+                            border: 2px solid {% if table.status == 'available' %}var(--color-success){% elif table.status == 'occupied' %}var(--color-warning){% elif table.status == 'reserved' %}var(--color-primary){% else %}var(--color-error){% endif %};
+                            transform: translate(-50%, -50%);"
+                     hx-get="/m/tables/tables/{{ table.id }}"
+                     hx-target="#main-content-area"
+                     hx-push-url="true">
+                    <span class="font-bold text-sm leading-tight">{{ table.number }}</span>
+                    <span class="text-xs opacity-70">{{ icon("people-outline", class="text-xs") }} {{ table.capacity }}</span>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="flex flex-col items-center justify-center h-full">
+                    {{ icon("map-outline", class="text-4xl text-muted mb-2") }}
+                    <p class="text-muted mb-3">{{ _("No tables on the floor plan") }}</p>
+                    <a hx-get="/m/tables/tables/add"
+                       hx-target="#main-content-area"
+                       hx-push-url="true"
+                       class="btn color-primary">
+                        {{ icon("add-outline") }} {{ _("Add Table") }}
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Legend -->
+<div class="flex items-center gap-4 px-4 mb-4 text-sm">
+    <div class="flex items-center gap-1">
+        <span class="inline-block w-3 h-3 rounded-full" style="background: var(--color-success)"></span>
+        {{ _("Available") }}
+    </div>
+    <div class="flex items-center gap-1">
+        <span class="inline-block w-3 h-3 rounded-full" style="background: var(--color-warning)"></span>
+        {{ _("Occupied") }}
+    </div>
+    <div class="flex items-center gap-1">
+        <span class="inline-block w-3 h-3 rounded-full" style="background: var(--color-primary)"></span>
+        {{ _("Reserved") }}
+    </div>
+    <div class="flex items-center gap-1">
+        <span class="inline-block w-3 h-3 rounded-full" style="background: var(--color-error)"></span>
+        {{ _("Blocked") }}
+    </div>
+</div>
+
+<!-- Tables grid list (alternative compact view) -->
+<div class="px-4 pb-4">
+    <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-semibold">{{ _("Tables") }}</h3>
+        <a hx-get="/m/tables/tables/add"
+           hx-target="#main-content-area"
+           hx-push-url="true"
+           class="btn btn-sm color-primary">
+            {{ icon("add-outline") }} {{ _("Add") }}
+        </a>
+    </div>
+    <div class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+        {% for table in tables %}
+        <a hx-get="/m/tables/tables/{{ table.id }}"
+           hx-target="#main-content-area"
+           hx-push-url="true"
+           class="card cursor-pointer hover:shadow-md transition-shadow">
+            <div class="card-body p-3 text-center">
+                <div class="text-xl font-bold mb-1"
+                     style="color: {% if table.status == 'available' %}var(--color-success){% elif table.status == 'occupied' %}var(--color-warning){% elif table.status == 'reserved' %}var(--color-primary){% else %}var(--color-error){% endif %}">
+                    {{ table.number }}
+                </div>
+                {% if table.name %}
+                <div class="text-xs text-muted truncate">{{ table.name }}</div>
+                {% endif %}
+                <div class="text-xs text-muted mt-1">{{ icon("people-outline", class="text-xs") }} {{ table.capacity }}</div>
+                <span class="badge badge-sm color-{{ table.status_color }} mt-1">
+                    {{ table.status_label }}
+                </span>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+<script nonce="{{ csp_nonce }}">
+(function() {
+    /* Enable table dragging on the floor plan for positioning */
+    const canvas = document.getElementById('floor-plan-canvas');
+    if (!canvas) return;
+
+    let dragging = null;
+    let offsetX, offsetY;
+
+    canvas.querySelectorAll('.floor-plan-table').forEach(el => {
+        el.addEventListener('mousedown', function(e) {
+            if (e.button !== 0) return;
+            e.preventDefault();
+            dragging = this;
+            const rect = canvas.getBoundingClientRect();
+            offsetX = e.clientX - this.getBoundingClientRect().left - this.offsetWidth / 2;
+            offsetY = e.clientY - this.getBoundingClientRect().top - this.offsetHeight / 2;
+            this.style.zIndex = '10';
+            this.style.opacity = '0.8';
+        });
+    });
+
+    document.addEventListener('mousemove', function(e) {
+        if (!dragging) return;
+        e.preventDefault();
+        const rect = canvas.getBoundingClientRect();
+        let x = ((e.clientX - rect.left) / rect.width) * 100;
+        let y = ((e.clientY - rect.top) / rect.height) * 100;
+        x = Math.max(0, Math.min(100, x));
+        y = Math.max(0, Math.min(100, y));
+        dragging.style.left = x + '%';
+        dragging.style.top = y + '%';
+    });
+
+    document.addEventListener('mouseup', function(e) {
+        if (!dragging) return;
+        dragging.style.zIndex = '';
+        dragging.style.opacity = '';
+
+        const rect = canvas.getBoundingClientRect();
+        let x = Math.round(((e.clientX - rect.left) / rect.width) * 100);
+        let y = Math.round(((e.clientY - rect.top) / rect.height) * 100);
+        x = Math.max(0, Math.min(100, x));
+        y = Math.max(0, Math.min(100, y));
+
+        const tableId = dragging.dataset.tableId;
+
+        /* Save position via API */
+        fetch('/m/tables/tables/' + tableId + '/position', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: 'position_x=' + x + '&position_y=' + y
+        });
+
+        /* Check if it was a click (no significant movement) - navigate to detail */
+        const startLeft = parseFloat(dragging.style.left);
+        const startTop = parseFloat(dragging.style.top);
+        if (Math.abs(startLeft - x) < 2 && Math.abs(startTop - y) < 2) {
+            htmx.ajax('GET', dragging.getAttribute('hx-get'), '#main-content-area');
+        }
+
+        dragging = null;
+    });
+})();
+</script>
