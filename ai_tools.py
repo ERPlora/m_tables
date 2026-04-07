@@ -214,6 +214,18 @@ class UpdateTable(AssistantTool):
         t = await _q(Table, db, hub_id).get(uuid.UUID(args["table_id"]))
         if t is None:
             return {"error": "Table not found"}
+
+        # Validate capacity > 0
+        if "capacity" in args and args["capacity"] <= 0:
+            return {"error": "Capacity must be greater than 0"}
+
+        # If deactivating, check for active sessions
+        if "is_active" in args and args["is_active"] is False and t.status != "available":
+            return {
+                "error": "Cannot deactivate table with active session. "
+                "Close or transfer the session first.",
+            }
+
         for field in ("number", "name", "capacity", "shape", "status", "is_active"):
             if field in args:
                 setattr(t, field, args[field])
@@ -305,6 +317,14 @@ class OpenTableSession(AssistantTool):
         if table.status != "available":
             return {"error": "Table is not available"}
 
+        # Warn if guests exceed capacity (allow with warning)
+        capacity_warning = None
+        if args["guests_count"] > table.capacity:
+            capacity_warning = (
+                f"Guest count ({args['guests_count']}) exceeds table capacity ({table.capacity}). "
+                f"Proceeding anyway."
+            )
+
         async with atomic(db) as session:
             ts = TableSession(
                 hub_id=hub_id,
@@ -317,12 +337,15 @@ class OpenTableSession(AssistantTool):
             await session.flush()
             table.set_status("occupied")
 
-        return {
+        result = {
             "session_id": str(ts.id),
             "table_number": table.number,
             "guests": ts.guests_count,
             "opened": True,
         }
+        if capacity_warning:
+            result["warning"] = capacity_warning
+        return result
 
 
 @register_tool

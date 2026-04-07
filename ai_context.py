@@ -37,6 +37,12 @@ Models: Zone, Table, TableSession.
 3. Open session when guests sit down → table becomes "occupied"
 4. Close session when guests leave → table becomes "available"
 5. Transfer session if guests move to another table
+
+### Restrictions (enforced by AI tools)
+
+- **Deactivation guard**: Cannot deactivate a table that has an active session (status != "available")
+- **Capacity warning**: Opening a session with guests_count > table.capacity produces a warning (but is allowed)
+- **Capacity validation**: Table capacity must be > 0
 """
 
 SOPS = [
