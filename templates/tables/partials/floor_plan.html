@@ -211,7 +211,7 @@
         fetch('/m/tables/tables/' + tableId + '/position', {
             method: 'POST',
             headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
+                'X-CSRFToken': getCsrfToken(),
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
             body: 'position_x=' + x + '&position_y=' + y

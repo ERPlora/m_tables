@@ -137,7 +137,7 @@
                         showDeleteConfirm = false;
                         fetch('/m/tables/tables/{{ table.id }}/delete', {
                             method: 'POST',
-                            headers: {'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''}
+                            headers: {'X-CSRFToken': getCsrfToken()}
                         }).then(r => r.json()).then(data => {
                             if (data.success) {
                                 htmx.ajax('GET', '/m/tables/tables', '#main-content-area');

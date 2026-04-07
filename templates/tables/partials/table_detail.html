@@ -11,7 +11,7 @@
         fetch('/m/tables/tables/{{ table.id }}/status', {
             method: 'POST',
             headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
+                'X-CSRFToken': getCsrfToken(),
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
             body: 'status=' + status
@@ -27,7 +27,7 @@
         this.showCloseConfirm = false;
         fetch('/m/tables/sessions/{{ current_session.id }}/close', {
             method: 'POST',
-            headers: {'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''}
+            headers: {'X-CSRFToken': getCsrfToken()}
         }).then(r => r.json()).then(data => {
             if (data.success) {
                 htmx.ajax('GET', '/m/tables/tables/{{ table.id }}', '#main-content-area');
@@ -46,7 +46,7 @@
         fetch('/m/tables/sessions/{{ current_session.id }}/transfer', {
             method: 'POST',
             headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
+                'X-CSRFToken': getCsrfToken(),
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
             body: 'target_table_id=' + targetId
@@ -65,7 +65,7 @@
         fetch('/m/tables/tables/{{ table.id }}/open', {
             method: 'POST',
             headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
+                'X-CSRFToken': getCsrfToken(),
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
             body: 'guests_count=' + encodeURIComponent(guests) + '&notes=' + encodeURIComponent(notes)
