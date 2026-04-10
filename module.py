@@ -10,7 +10,7 @@ Restaurant floor plan management with zones, tables, and sessions.
 # ---------------------------------------------------------------------------
 MODULE_ID = "tables"
 MODULE_NAME = "Tables"
-MODULE_VERSION = "2.0.0"
+MODULE_VERSION = "2.0.1"
 MODULE_ICON = "material:table_restaurant"
 MODULE_DESCRIPTION = "Restaurant floor plan management with zones, tables, and sessions"
 MODULE_AUTHOR = "ERPlora"
