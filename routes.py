@@ -298,7 +298,7 @@ async def table_add_post(request: Request, db: DbSession, user: CurrentUser, hub
 
 
 @router.get("/tables/{table_id}")
-@htmx_view(module_id="tables", view_id="tables")
+@htmx_view(module_id="tables", view_id="tables", partial_template="tables/partials/table_detail.html")
 async def table_detail(
     request: Request, table_id: uuid.UUID,
     db: DbSession, user: CurrentUser, hub_id: HubId,
