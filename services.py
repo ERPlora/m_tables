@@ -6,8 +6,8 @@ import uuid
 
 from sqlalchemy.orm import selectinload
 
-from app.core.db.transactions import atomic
-from app.modules.services import ModuleService, action
+from runtime.orm.transactions import atomic
+from runtime.apps.service_facade import ModuleService, action
 
 from .models import Table, TableSession, Zone
 

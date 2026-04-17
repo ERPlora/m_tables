@@ -14,7 +14,6 @@ MODULE_VERSION = "2.0.4"
 MODULE_ICON = "material:table_restaurant"
 MODULE_DESCRIPTION = "Restaurant floor plan management with zones, tables, and sessions"
 MODULE_AUTHOR = "ERPlora"
-MODULE_CATEGORY = "hospitality"
 
 # ---------------------------------------------------------------------------
 # Capabilities
